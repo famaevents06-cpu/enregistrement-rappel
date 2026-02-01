@@ -135,12 +135,7 @@ const dateAffichage = `${d[2]}/${d[1]}/${d[0]}`;
         } else if (diffDays <= 7 && diffDays > 2) {
             mention = `J-${diffDays}`; actions = btnWA(item) + btnSMS(item);
         } else if (diffDays <=2) {
-            mention = `J-${diffDays}`; actions = btnWA(item) + btnSMS(item) + btnAppel(item.whatsapp);
-        } else if (diffDays >0 && diffHours <= 24) {
-            color = "text-orange-500 animate-pulse";
-            mention = `⚠️ Urgent (${Math.floor(diffHours)}h restantes)`; actions = btnAppel(item.whatsapp);
-
-            
+            mention = `J-${diffDays}`; actions = btnWA(item) + btnSMS(item) + btnAppel(item.whatsapp)   
         }
 
         // Ajout du bouton Facture pour tous les rappels non terminés
