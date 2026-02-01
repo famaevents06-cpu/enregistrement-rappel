@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAAF ASSISTANCE | Rappels Professionnels</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .hover-underline-animation {
+            position: relative; color: #60a5fa; transition: all 0.3s ease;
+        }
+        .hover-underline-animation::after {
+            content: ''; position: absolute; width: 100%; transform: scaleX(0); height: 2px;
+            bottom: -2px; left: 0; background-color: #60a5fa; transform-origin: bottom right; transition: transform 0.25s ease-out;
+        }
+        .hover-underline-animation:hover::after { transform: scaleX(1); transform-origin: bottom left; }
+        .gradient-btn { background: linear-gradient(90deg, #1e40af 0%, #3b82f6 100%); transition: transform 0.2s; }
+        .gradient-btn:hover { transform: scale(1.05); box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.5); }
+        .hidden-step { display: none; }
+        .form-group { margin-bottom: 20px; }
+        input, select, textarea {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: 0.3s;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+
+    <header class="sticky top-0 z-50 bg-white shadow-md border-b-4 border-blue-800">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-blue-800">MAAF <span class="text-blue-500">ASSISTANCE</span></h1>
+            <nav class="hidden md:flex space-x-8 font-medium">
+                <a href="#" class="hover-underline-animation">Accueil</a>
+                <a href="#reminderForm" class="hover-underline-animation">Enregistrer un rappel</a>
+                <a href="#blog" class="hover-underline-animation">Blog</a>
+                <a href="#contact" class="hover-underline-animation">Contact</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-12">
+        <div id="step-1" class="max-w-2xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100">
+            <div class="bg-blue-800 p-6 text-white text-center">
+                <h2 class="text-2xl font-semibold">Programmer votre rappel</h2>
+                <p class="text-blue-200">Remplissez les informations ci-dessous</p>
+            </div>
+            
+            <form id="reminderForm" class="p-8 space-y-6">
+                <div>
+                    <label class="block text-gray-700 font-bold mb-2">Nom complet</label>
+                    <input type="text" id="fullName" required class="w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="md:col-span-1">
+                        <label class="block text-gray-700 font-bold mb-2">Pays</label>
+                        <select id="countryCode" class="w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-blue-500 bg-white">
+                            <option value="+229">Bénin (+229)</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-gray-700 font-bold mb-2">Numéro WhatsApp</label>
+                        <input type="tel" id="whatsapp" placeholder="96XXXXXX" required class="w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 font-bold mb-2">Type de rappel</label>
+                    <select id="reminderType" onchange="handleTypeChange()" class="w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-blue-500 bg-white">
+                        <option value="">-- Sélectionner --</option>
+                        <option value="Réunion d'affaire">Réunion d'affaire</option>
+                        <option value="Entretien professionnel">Entretien professionnel</option>
+                        <option value="Rendez-vous Médical">Rendez-vous Médical</option>
+                        <option value="Factures">Factures</option>
+                        <option value="Cnss">Rendez-vous CNSS Contrôle de Vie
+                            <option value="Formation">Formation/Cours</option>
+                            <option value="Composition">Composition/Examen</option>
+                            <option value="Versement">Versement</option>
+                            <option value="Achat/Vente">Achat/Vente</option>
+                            <option value="Reception/Livraison">Reception/Livraison</option>
+                            <option value="Anniversaire">Anniversaire</option>
+                            <option value="Ceremonoie">Cérémonie</option>
+                        </option>
+                    </select>
+                </div>
+
+                <div id="amountSection" class="hidden animate-pulse">
+                    <label class="block text-blue-800 font-bold mb-2">💰 Montant du service (CFA)</label>
+                    <input type="text" id="amount" readonly class="w-full px-4 py-3 bg-blue-50 text-blue-800 font-bold rounded-lg border-2 border-blue-200">
+                </div>
+
+                <div id="medicalSection" class="hidden space-y-4">
+                    <label class="block text-gray-700 font-bold">Centre de santé</label>
+                    <input type="text" id="centreSante" placeholder="Le nom du Centre de Santé/Clinique/Hopital..." required class="w-full px-4 py-3 rounded-lg border bg-gray-50">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-gray-700 font-bold mb-2">Date et Heure</label>
+                        <input type="datetime-local" id="dateTime" required class="w-full px-4 py-3 rounded-lg border">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-bold mb-2">Lieu</label>
+                        <input type="text" id="location" placeholder="Ex: Cotonou" required class="w-full px-4 py-3 rounded-lg border">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Instructions ou détails</label>
+                    <textarea name="notes" rows="3" placeholder="Ex: Apporter les dossiers originaux..."></textarea>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    <input type="checkbox" id="cgu" required class="w-5 h-5 text-blue-600">
+                    <label class="text-sm text-gray-600">Je confirme l’exactitude des informations et j’accepte les CGU</label>
+                </div>
+
+                <button type="button" onclick="showConfirmation()" class="w-full gradient-btn text-white font-bold py-4 rounded-xl shadow-lg uppercase tracking-wider">
+                    Je valide mon rappel
+                </button>
+            </form>
+        </div>
+
+        <div id="step-2" class="max-w-2xl mx-auto bg-white rounded-2xl shadow-2xl p-8 hidden-step border-t-8 border-blue-600">
+            <h2 class="text-2xl font-bold text-center text-blue-800 mb-6">Récapitulatif</h2>
+            <div id="summaryContent" class="space-y-4 text-lg border-b pb-6"></div>
+            <button onclick="showPayment()" class="w-full mt-6 bg-green-600 text-white font-bold py-4 rounded-xl hover:bg-green-700 transition">
+                Suivant
+            </button>
+        </div>
+
+        <div id="step-3" class="max-w-2xl mx-auto bg-white rounded-2xl shadow-2xl p-8 hidden-step">
+            <h2 class="text-xl font-bold text-center text-gray-800 mb-4">Paiement Manuel</h2>
+            <p class="text-center text-gray-600 mb-8 font-medium">Veuillez effectuer le transfert sur l'un des réseaux ci-dessous :</p>
+            
+            <div class="space-y-4">
+                <label class="flex items-center p-4 border-2 rounded-xl cursor-pointer hover:border-yellow-400 transition">
+                    <input type="radio" name="payment" class="w-6 h-6 mr-4" value="MTN">
+                    <span class="font-bold flex-1">MTN Money - 01 96 61 50 29</span>
+                </label>
+                <label class="flex items-center p-4 border-2 rounded-xl cursor-pointer hover:border-blue-400 transition">
+                    <input type="radio" name="payment" class="w-6 h-6 mr-4" value="MOOV">
+                    <span class="font-bold flex-1">MOOV Money - 01 95 88 89 90</span>
+                </label>
+            </div>
+
+            <div class="mt-8 p-4 bg-gray-100 rounded-lg italic text-sm text-center">
+                NB : Veuillez écrire le nom du client comme référence de transaction
+            </div>
+
+            <button onclick="finishOrder()" class="w-full mt-6 gradient-btn text-white font-bold py-4 rounded-xl">
+                Confirmation de Paiement
+            </button>
+        </div>
+    </main>
+    <section id="blog" class="py-16 bg-gray-100">
+    <div class="container mx-auto px-6">
+        <div class="flex justify-between items-center mb-10">
+            <h2 class="text-3xl font-bold text-blue-800 border-l-8 border-blue-600 pl-4">Blog & Actualités</h2>
+            <a href="#blog" class="text-blue-600 font-semibold hover:underline">Voir tout →</a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden group">
+                <div class="h-48 bg-blue-200 overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1506784983877-45594efa4cbe?auto=format&fit=crop&w=800" alt="Rappel" class="w-full h-full object-cover group-hover:scale-110 transition duration-300">
+                </div>
+                <div class="p-6">
+                    <span class="text-xs font-bold text-blue-500 uppercase">Astuces</span>
+                    <h3 class="text-xl font-bold mt-2 mb-3">Pourquoi utiliser un service de rappel professionnel ?</h3>
+                    <p class="text-gray-600 text-sm mb-4">Ne manquez plus jamais vos rendez-vous médicaux ou vos échéances CNSS grâce à MAAF...</p>
+                    <a href="pourquoi_blog_suivi_med.html" class="text-blue-800 font-bold text-sm hover:text-blue-600 transition">Lire la suite</a>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden group">
+                <div class="h-48 bg-blue-200 overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=800" alt="Santé" class="w-full h-full object-cover group-hover:scale-110 transition duration-300">
+                </div>
+                <div class="p-6">
+                    <span class="text-xs font-bold text-green-500 uppercase">Santé</span>
+                    <h3 class="text-xl font-bold mt-2 mb-3">L'importance du suivi médical régulier</h3>
+                    <p class="text-gray-600 text-sm mb-4">Gérer ses prises de médicaments devient simple avec notre système de notification WhatsApp.</p>
+                    <a href="blog_suivi_med.html/" class="text-blue-800 font-bold text-sm hover:text-blue-600 transition">Lire la suite</a>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden group">
+                <div class="h-48 bg-blue-200 overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1454165205744-3b78555e5572?auto=format&fit=crop&w=800" alt="Business" class="w-full h-full object-cover group-hover:scale-110 transition duration-300">
+                </div>
+                <div class="p-6">
+                    <span class="text-xs font-bold text-purple-500 uppercase">Annonces</span>
+                    <h3 class="text-xl font-bold mt-2 mb-3">Nouveauté : Paiements facilités via MTN & Moov</h3>
+                    <p class="text-gray-600 text-sm mb-4">Découvrez comment valider vos rappels en moins de 2 minutes avec nos nouveaux réseaux.</p>
+                    <a href="#" class="text-blue-800 font-bold text-sm hover:text-blue-600 transition">Lire la suite</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+    <div class="fixed bottom-6 right-6 flex flex-col space-y-4">
+        <a href="https://wa.me/22943897606" class="bg-green-500 text-white p-4 rounded-full shadow-2xl animate-bounce"><i class="fab fa-whatsapp text-2xl"></i></a>
+        <a href="tel:+22943897606" class="bg-blue-600 text-white p-4 rounded-full shadow-2xl"><i class="fas fa-phone text-2xl"></i></a>
+    </div>
+
+    <script>
+        function handleTypeChange() {
+            const type = document.getElementById('reminderType').value;
+            const amountSec = document.getElementById('amountSection');
+            const medicalSec = document.getElementById('medicalSection');
+            const amountInput = document.getElementById('amount');
+
+            medicalSec.classList.add('hidden');
+            amountSec.classList.remove('hidden');
+
+            if (type === "Rendez-vous Médical" || type === "Rendez-vous CNSS") {
+                amountSec.classList.add('hidden');
+                if (type === "Rendez-vous Médical") medicalSec.classList.remove('hidden');
+            } else {
+                amountInput.value = "500 FCFA"; // Montant exemple
+            }
+        }
+
+        function showConfirmation() {
+            const name = document.getElementById('fullName').value;
+            const type = document.getElementById('reminderType').value;
+            if(!name || !type) return alert("Veuillez remplir les champs");
+
+            document.getElementById('summaryContent').innerHTML = `
+                <p><strong>Nom :</strong> ${name}</p>
+                <p><strong>Type :</strong> ${type}</p>
+                <p><strong>Date :</strong> ${document.getElementById('dateTime').value}</p>
+                <p><strong>Lieu :</strong> ${document.getElementById('location').value}</p>
+            `;
+            
+            document.getElementById('step-1').classList.add('hidden-step');
+            document.getElementById('step-2').classList.remove('hidden-step');
+        }
+
+        function showPayment() {
+            document.getElementById('step-2').classList.add('hidden-step');
+            document.getElementById('step-3').classList.remove('hidden-step');
+        }
+
+        function finishOrder() {
+            alert("✅ Votre demande est en cours de traitement. Un message de confirmation vous sera envoyé sur WhatsApp.");
+            location.reload();
+        }
+        const analytics = {
+    os: navigator.platform,
+    browser: navigator.userAgent,
+    timeSpent: performance.now() / 1000 // secondes
+};
+// Envoyer ces données vers Google Sheets avec le reste du formulaire
+async function finishOrder() {
+    // Collecte des données
+    const data = {
+        idClient: "MAAF-" + Math.floor(Math.random() * 1000000), // ID Unique
+        nomComplet: document.getElementById('fullName').value,
+        whatsapp: document.getElementById('countryCode').value + document.getElementById('whatsapp').value,
+        typeRappel: document.getElementById('reminderType').value,
+        montant: document.getElementById('amount').value || "0",
+        dateEvenement: document.getElementById('dateTime').value,
+        lieu: document.getElementById('location').value,
+        debutSession: new Date().toLocaleString(),
+        finRemplissage: new Date().toLocaleString(),
+        duree: "45", // Calculable via timer
+        appareil: navigator.userAgent.substring(0, 50),
+        reseau: document.querySelector('input[name="payment"]:checked')?.value || "Non spécifié",
+        statut: "Payé"
+        
+    };
+
+    // REMPLACEZ CETTE URL PAR LA VOTRE (L'URL copiée à l'étape 2)
+    const urlScript = "https://script.google.com/macros/s/AKfycbyXtNnG7xsMGLywRlPip9lO5G2Hs_8f74l_xyhqo8BSYmNXh1VqXTJLaYQ4arLDMkZ2ZQ/exec";
+
+    try {
+        await fetch(urlScript, {
+            method: 'POST',
+            mode: 'no-cors', // Important pour Google Scripts
+            body: JSON.stringify(data),
+            headers: { 'Content-Type': 'application/json' }
+        });
+        
+        alert("✅ Paiement en attente. Votre rappel est enregistré !");
+        location.reload();
+    } catch (e) {
+        alert("Erreur lors de l'enregistrement.");
+    }
+}
+    </script>
+    <div class="fixed bottom-8 right-6 flex flex-col space-y-4 z-[100]">
+    
+    <a href="https://wa.me/22943897606?text=Bonjour%20MAAF%20ASSISTANCE,%20j'aimerais%20avoir%20des%20informations." 
+       target="_blank"
+       class="group relative flex items-center justify-center w-16 h-16 bg-green-500 text-white rounded-full shadow-2xl hover:bg-green-600 transition-all duration-300 hover:scale-110 shadow-green-500/50">
+        
+        <span class="absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75 animate-ping"></span>
+        
+        <i class="fab fa-whatsapp text-3xl relative z-10"></i>
+        
+        <span class="absolute right-20 bg-gray-800 text-white text-xs px-3 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+            Discuter sur WhatsApp
+        </span>
+    </a>
+
+    <a href="tel:+22943897606" 
+       class="group relative flex items-center justify-center w-16 h-16 bg-blue-700 text-white rounded-full shadow-2xl hover:bg-blue-800 transition-all duration-300 hover:scale-110 shadow-blue-900/50">
+        
+        <i class="fas fa-phone-alt text-2xl"></i>
+        
+        <span class="absolute right-20 bg-gray-800 text-white text-xs px-3 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+            Nous appeler
+        </span>
+    </a>
+</div>
+
+<section id="contact" class="py-12 bg-white border-t border-gray-200">
+    <div class="container mx-auto px-6 text-center">
+        <h2 class="text-2xl font-bold text-blue-800 mb-4">Besoin d'aide ?</h2>
+        <p class="text-gray-600 mb-8">Notre équipe support est disponible pour vous accompagner dans vos démarches.</p>
+        
+        <div class="flex flex-wrap justify-center gap-8">
+            <div class="flex items-center space-x-3 text-gray-700">
+                <i class="fas fa-envelope text-blue-600 text-xl"></i>
+                <span>maafassistance6@gmail.com</span>
+            </div>
+            <div class="flex items-center space-x-3 text-gray-700">
+                <i class="fas fa-map-marker-alt text-blue-600 text-xl"></i>
+                <span>Cotonou, Bénin</span>
+            </div>
+        </div>
+    </div>
+</section>
+<footer class="bg-blue-900 text-white py-10">
+    <div class="container mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
+        <div>
+            <h3 class="text-xl font-bold mb-4">MAAF ASSISTANCE</h3>
+            <p class="text-blue-200 text-sm">Votre partenaire de confiance pour ne plus jamais oublier l'essentiel.</p>
+        </div>
+        <div>
+            <h4 class="font-bold mb-4">Liens Utiles</h4>
+            <ul class="text-blue-200 text-sm space-y-2">
+                <li><a href="#" class="hover:text-white">Mentions Légales</a></li>
+                <li><a href="#" class="hover:text-white">Confidentialité</a></li>
+                <li><a href="cgu.html" class="font-bold text-yellow-400 hover:text-yellow-300">Conditions Générales d'Utilisation (CGU)</a></li>
+            </ul>
+        </div>
+        <div>
+            <h4 class="font-bold mb-4">Suivez-nous</h4>
+            <div class="flex justify-center md:justify-start space-x-4">
+                <a href="#" class="hover:text-blue-400"><i class="fab fa-facebook-f text-xl"></i></a>
+                <a href="" class="hover:text-blue-400"><i class="fab fa-instagram text-xl"></i></a>
+            </div>
+        </div>
+    </div>
+    <div class="border-t border-blue-800 mt-10 pt-6 text-center text-blue-400 text-xs">
+        &copy; 2026 MAAF ASSISTANCE. Tous droits réservés.
+    </div>
+</footer>
+</body>
+</html>
