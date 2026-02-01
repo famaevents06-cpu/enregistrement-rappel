@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>ADMIN | MAAF ASSISTANCE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-slate-900 text-white min-h-screen">
+
+    <div id="auth-screen" class="fixed inset-0 bg-slate-900 z-[200] flex items-center justify-center">
+        <div class="bg-slate-800 p-8 rounded-2xl shadow-2xl border border-slate-700 w-96 text-center">
+            <h1 class="text-2xl font-bold mb-6 text-blue-400">MAAF ADMIN</h1>
+            <input type="password" id="admin-pass" placeholder="Mot de passe" class="w-full p-3 rounded bg-slate-700 mb-4 outline-none border border-slate-600 focus:border-blue-500">
+            <button onclick="checkAuth()" class="w-full bg-blue-600 py-3 rounded font-bold hover:bg-blue-500">Accéder</button>
+        </div>
+    </div>
+
+    <div id="admin-content" class="hidden p-6">
+        <header class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+            <h2 class="text-3xl font-bold italic text-blue-400">Dashboard MAAF ASSISTANCE</h2>
+            <div class="flex gap-4">
+                <input type="text" id="search" onkeyup="filterTable()" placeholder="Recherche intelligente..." class="bg-slate-800 border border-slate-700 p-2 rounded outline-none">
+                <button onclick="exportPDF()" class="bg-red-600 px-4 py-2 rounded text-sm font-bold"><i class="fas fa-file-pdf mr-2"></i>Export Liste PDF</button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-blue-900/30 border border-blue-500/50 p-6 rounded-2xl shadow-lg">
+        <p class="text-blue-400 text-sm uppercase font-bold">Revenus Totaux</p>
+        <h3 id="stat-revenus" class="text-3xl font-black mt-2">0 FCFA</h3>
+    </div>
+    <div class="bg-green-900/30 border border-green-500/50 p-6 rounded-2xl shadow-lg">
+        <p class="text-green-400 text-sm uppercase font-bold">Rappels Payés</p>
+        <h3 id="stat-payes" class="text-3xl font-black mt-2">0</h3>
+    </div>
+    <div class="bg-slate-800 border border-slate-700 p-6 rounded-2xl shadow-lg">
+        <p class="text-slate-400 text-sm uppercase font-bold">Filtrer par Date</p>
+        <input type="date" id="filter-date" onchange="filterTable()" class="bg-transparent text-white outline-none mt-2 w-full">
+    </div>
+</div>
+        </header>
+
+        <div class="overflow-x-auto bg-slate-800 rounded-xl border border-slate-700 shadow-xl">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-700 text-blue-300 uppercase text-xs">
+                        <th class="p-4">Client / WhatsApp</th>
+                        <th class="p-4">Rappel / Lieu</th>
+                        <th class="p-4">Échéance</th>
+                        <th class="p-4 text-center">Actions Requises</th>
+                        <th class="p-4">Suppr.</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    </tbody>
+            </table>
+        </div>
+        <div class="mt-4 text-xs text-slate-500 flex justify-between">
+            <p>Actualisation auto: 60s</p>
+            <p id="last-update"></p>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycbyXtNnG7xsMGLywRlPip9lO5G2Hs_8f74l_xyhqo8BSYmNXh1VqXTJLaYQ4arLDMkZ2ZQ/exec";
+        const ADMIN_PASS = "060295"; // Changez votre mot de passe ici
+
+        function checkAuth() {
+            if(document.getElementById('admin-pass').value === ADMIN_PASS) {
+                document.getElementById('auth-screen').classList.add('hidden');
+                document.getElementById('admin-content').classList.remove('hidden');
+                loadData();
+                setInterval(loadData, 60000);
+            } else { alert("Accès refusé"); }
+        }
+
+        async function loadData() {
+            const res = await fetch(API_URL);
+            const data = await res.json();
+            renderTable(data);
+            document.getElementById('last-update').innerText = "Dernière mise à jour: " + new Date().toLocaleTimeString();
+        }
+
+        // Variable globale pour stocker les données et faciliter le filtrage
+let globalData = [];
+
+function renderTable(data) {
+    globalData = data;
+    const tbody = document.getElementById('table-body');
+    tbody.innerHTML = "";
+    const now = new Date();
+    
+    let revenusTotaux = 0;
+    let nbPayes = 0;
+
+    data.forEach(item => {
+        // CORRECTION HEURE : On remplace le 'T' par ' ' pour éviter l'interprétation UTC
+        const datePropre = item.dateEv.replace('T', ' ');
+       // --- COLLE CE BLOC À LA PLACE ---
+let rawDateStr = String(item.dateEv); 
+let parts = rawDateStr.split('T');
+let datePart = parts[0]; 
+let timePart = parts[1] ? parts[1].substring(0, 5) : "00:00"; 
+
+let d = datePart.split('-');
+let t = timePart.split(':');
+
+// On force la date selon TON horloge locale (Bénin)
+const dateEv = new Date(d[0], d[1] - 1, d[2], t[0], t[1]);
+
+// On recalcule les différences avec la nouvelle date exacte
+const diffMs = dateEv - now;
+const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+const diffHours = diffMs / (1000 * 60 * 60);
+
+// Format pour l'affichage propre dans la colonne
+// PAR CECI (Garde uniquement le jour/mois/année) :
+const dateAffichage = `${d[2]}/${d[1]}/${d[0]}`;
+        // Calcul des stats
+        if(item.statut === "Payé") {
+            revenusTotaux += parseFloat(item.montant || 0);
+            nbPayes++;
+        }
+
+        let mention = "";
+        let color = "text-white";
+        let actions = "";
+
+        // LOGIQUE D'AFFICHAGE DES BOUTONS (selon vos critères)
+        if (diffMs < 0) { 
+            mention = "✅ Terminé"; color = "text-gray-500"; actions = "<span class='text-xs italic text-gray-500'>Aucune action</span>";
+        } else if (diffDays > 7) {
+            mention = "⏳ En attente +7j"; actions = "<span class='text-xs opacity-50 text-white'>Pas d'action requise</span>";
+        } else if (diffDays <= 7 && diffDays > 2) {
+            mention = `J-${diffDays}`; actions = btnWA(item) + btnSMS(item);
+        } else if (diffDays <=2) {
+            mention = `J-${diffDays}`; actions = btnWA(item) + btnSMS(item) + btnAppel(item.whatsapp);
+        } else if (diffDays >0 && diffHours <= 24) {
+            color = "text-orange-500 animate-pulse";
+            mention = `⚠️ Urgent (${Math.floor(diffHours)}h restantes)`; actions = btnAppel(item.whatsapp);
+
+            
+        }
+
+        // Ajout du bouton Facture pour tous les rappels non terminés
+        if (diffMs >= 0) {
+            actions += `<button onclick="genererFacture('${item.id}', '${item.nom}', '${item.type}', '${item.montant}', '${item.dateEv}')" class="bg-red-500 p-2 rounded text-xs ml-2 hover:bg-red-400" title="Facture PDF"><i class="fas fa-file-invoice"></i></button>`;
+        }
+
+        tbody.innerHTML += `
+            <tr class="border-b border-slate-700 hover:bg-slate-800/50 transition row-item" data-date="${item.dateEv.split('T')[0]}">
+                <td class="p-4"><b>${item.nom}</b><br><span class="text-xs text-blue-400">${item.whatsapp}</span></td>
+                <td class="p-4 text-sm">${item.type}<br><span class="text-gray-400 italic">${item.lieu}</span></td>
+                <td class="p-4 text-sm font-bold ${color}">${mention}<br><span class="font-normal text-xs opacity-60">${datePropre}</span></td>
+                <td class="p-4 text-center space-x-1">${actions}</td>
+                <td class="p-4 text-center">
+                    <input type="checkbox" onclick="deleteLine('${item.id}', '${item.nom}')" class="w-5 h-5 accent-red-500 cursor-pointer">
+                </td>
+            </tr>
+        `;
+    });
+
+    // Mise à jour des petits tableaux de bord
+    document.getElementById('stat-revenus').innerText = revenusTotaux.toLocaleString() + " FCFA";
+    document.getElementById('stat-payes').innerText = nbPayes;
+}
+
+// Système de filtrage intelligent (Recherche + Date)
+function filterTable() {
+    const searchVal = document.getElementById('search').value.toLowerCase();
+    const dateVal = document.getElementById('filter-date').value; // format YYYY-MM-DD
+
+    document.querySelectorAll('.row-item').forEach(row => {
+        const text = row.innerText.toLowerCase();
+        const rowDate = row.getAttribute('data-date');
+        
+        const matchSearch = text.includes(searchVal);
+        const matchDate = dateVal === "" || rowDate === dateVal;
+
+        if (matchSearch && matchDate) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+        // GENERATEURS DE BOUTONS
+        function btnWA(item) {
+    // Message professionnel et courtois
+    const message = `🌟 *MAAF ASSISTANCE - RAPPEL* 🌟\n\n` +
+                    `Bonjour *${item.nom}*,\n\n` +
+                    `Ceci est un rappel pour votre rendez-vous : \n` +
+                    `📌 *Motif :* ${item.type}\n` +
+                    `📅 *Date :* ${item.dateEv.replace('T', ' à ')}\n` +
+                    `📍 *Lieu :* ${item.lieu}\n\n` +
+                    `Nous restons à votre disposition pour toute information complémentaire. Merci de votre confiance !`;
+
+    const encodedMsg = window.encodeURIComponent(message);
+    return `<a href="https://wa.me/${item.whatsapp}?text=${encodedMsg}" target="_blank" class="bg-green-600 p-2 rounded text-xs mx-1 hover:bg-green-500 shadow-lg"><i class="fab fa-whatsapp"></i></a>`;
+}
+        function btnSMS(item, j) {
+            return `<a href="sms:${item.whatsapp}" class="bg-blue-500 p-2 rounded text-xs"><i class="fas fa-sms"></i></a>`;
+        }
+        function btnAppel(phone) {
+            return `<a href="tel:${phone}" class="bg-orange-500 p-2 rounded text-xs"><i class="fas fa-phone"></i></a>`;
+        }
+
+        async function deleteLine(id, nom) {
+            if(confirm(`Voulez-vous vraiment supprimer le client ${nom} ?`)) {
+                await fetch(`${API_URL}?action=delete&id=${id}`);
+                loadData();
+            }
+        }
+
+        function filterTable() {
+            let val = document.getElementById('search').value.toLowerCase();
+            document.querySelectorAll('#table-body tr').forEach(row => {
+                row.style.display = row.innerText.toLowerCase().includes(val) ? '' : 'none';
+            });
+        }
+        
+        // EXPORT PDF DE BASE
+        function exportPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text("LISTE DES RAPPELS - MAAF ASSISTANCE", 10, 10);
+            let y = 20;
+            document.querySelectorAll('#table-body tr').forEach(row => {
+                doc.text(row.cells[0].innerText + " | " + row.cells[1].innerText, 10, y);
+                y += 10;
+            });
+            doc.save("Maaf-Liste.pdf");
+        }
+        function genererFacture(id, nom, type, montant, date) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // --- Design de la Facture ---
+    // En-tête bleu
+    doc.setFillColor(30, 64, 175); // Bleu MAAF
+    doc.rect(0, 0, 210, 40, 'F');
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(22);
+    doc.text("MAAF ASSISTANCE", 10, 25);
+    doc.setFontSize(10);
+    doc.text("Service de Rappel Professionnel", 10, 32);
+    
+    // Infos Facture
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text(`FACTURE N° : ${id}`, 140, 55);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Date d'émission : ${new Date().toLocaleDateString()}`, 140, 62);
+
+    // Infos Client
+    doc.setFont("helvetica", "bold");
+    doc.text("DESTINATAIRE :", 15, 80);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Nom : ${nom}`, 15, 88);
+    doc.text(`Prestation : Rappel pour ${type}`, 15, 96);
+    doc.text(`Date de l'événement : ${date.replace('T', ' à ')}`, 15, 104);
+
+    // Tableau des prix
+    doc.setFillColor(240, 240, 240);
+    doc.rect(15, 120, 180, 10, 'F');
+    doc.setFont("helvetica", "bold");
+    doc.text("Description", 20, 127);
+    doc.text("Total (FCFA)", 160, 127);
+    
+    doc.setFont("helvetica", "normal");
+    doc.text(`Frais d'assistance et notifications rappel`, 20, 140);
+    doc.text(`${montant}`, 160, 140);
+
+    // Pied de page
+    doc.setDrawColor(200, 200, 200);
+    doc.line(15, 250, 195, 250);
+    doc.setFontSize(9);
+    doc.setTextColor(100, 100, 100);
+    doc.text("MAAF ASSISTANCE - Cotonou, Bénin - contact@maafassistance.com", 105, 260, null, null, "center");
+    doc.text("Merci de votre confiance !", 105, 267, null, null, "center");
+
+    // Sauvegarde et proposition d'envoi
+    doc.save(`Facture_MAAF_${nom.replace(/\s+/g, '_')}.pdf`);
+    
+    alert("Le PDF a été généré. Vous pouvez maintenant le partager manuellement sur WhatsApp.");
+}
+    </script>
+</body>
+</html>
